@@ -1,3 +1,4 @@
+/* defining CSS variables that can be accessed and used anywhere in your CSS */
 :root {
   --color-sub: #2d2d39;
 }
@@ -860,4 +861,11 @@ img {
 
 
   z-index: 99999;
+}
+
+
+/* my classes */
+img .myclass {
+  height: 300px;
+  width: 300px;
 }

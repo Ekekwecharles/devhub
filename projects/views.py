@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from .models import Project, Tag
-from .forms import ProjectForm
+from .forms import ProjectForm, ReviewForm
 from .utils import searchProject, paginateProjects
 
 # Create your views here.
@@ -20,10 +20,12 @@ def projects(request):
 
 def project(request, pk):
     projectobj = Project.objects.get(id=pk)
+    form =  ReviewForm()
     tags = projectobj.tags.all()
     context = {
         'project': projectobj,
         'tags': tags,
+        'form': form,
     }
     return render(request, 'projects/single_project.html', context)
 
