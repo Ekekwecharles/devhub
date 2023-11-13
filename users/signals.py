@@ -19,7 +19,7 @@ def createProfile(sender, instance, created, **kwargs):
         )
 
         subject = 'Welcome to Devbhub'
-        message = "We are glad you are here!"
+        message = "We are glad you are here! new mail"
 
         send_mail(
             subject,
@@ -41,8 +41,11 @@ def updateUser(sender, instance, created, **kwargs):
         user.save()
 
 def deleteUser(sender, instance, **kwargs):
-    user = instance.user
-    user.delete()
+    try:
+        user = instance.user
+        user.delete()
+    except:
+        pass
 
 post_save.connect(createProfile, sender=User)
 post_save.connect(updateUser, sender=Profile)

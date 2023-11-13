@@ -20,8 +20,31 @@ class Project(models.Model):
         return self.title
     
     class Meta:
-        ordering = ['created']
+        ordering = ['-vote_ratio', '-vote_total', 'title']
+
+    @property
+    def imageURL(self):
+        try:
+            url = self.featured_image.url
+        except:
+            url = ''
+        return url
+
+    @property
+    def reviewers(self):
+        queryset = self.review_set.all().values_list('owner__id', flat=True)
+        return queryset
     
+    @property
+    def getVoteCount(self):
+        reviews = self.review_set.all()
+        upVotes = reviews.filter(value="up").count()
+        totalVotes = reviews.count()
+
+        ratio = (upVotes / totalVotes) * 100
+        self.vote_total = totalVotes
+        self.vote_ratio = ratio
+        self.save()        
 
     def get_owner_id(self):
         return self.owner.id if self.owner else None

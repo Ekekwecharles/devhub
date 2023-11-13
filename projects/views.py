@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from django.db.models import Q
 from .models import Project, Tag
 from .forms import ProjectForm, ReviewForm
@@ -22,6 +23,19 @@ def project(request, pk):
     projectobj = Project.objects.get(id=pk)
     form =  ReviewForm()
     tags = projectobj.tags.all()
+
+    if request.method == 'POST':
+        form = ReviewForm(request.POST)
+        review = form.save(commit=False)
+        review.project = projectobj
+        review.owner = request.user.profile
+        review.save()
+
+        projectobj.getVoteCount
+
+        messages.success(request, "Your review was successfully submitted!")
+        return redirect('project', pk=projectobj.id)
+
     context = {
         'project': projectobj,
         'tags': tags,
@@ -35,12 +49,17 @@ def createProject(request):
     form = ProjectForm()
 
     if request.method == 'POST':
+        newtags = request.POST.get('newtags').replace(',', " ").split()
         # Create a new instance of that form
         form = ProjectForm(request.POST, request.FILES)
         if form.is_valid():
             project = form.save(commit=False)
             project.owner = profile
             project.save()
+
+            for tag in newtags:
+                tag, created = Tag.objects.get_or_create(name=tag)
+                project.tags.add(tag)
             return redirect('account')
     context = {'form': form}
     return render(request, 'projects/project_form.html', context)
@@ -53,12 +72,18 @@ def updateProject(request, pk):
     form = ProjectForm(instance=project)
 
     if request.method == 'POST':
-        # Updating a Project
+        newtags = request.POST.get('newtags').replace(',', " ").split()
+
+
         form = ProjectForm(request.POST, request.FILES, instance=project)
         if form.is_valid():
-            form.save()
+            project = form.save()
+            for tag in newtags:
+                tag, created = Tag.objects.get_or_create(name=tag)
+                project.tags.add(tag)
+
             return redirect('account')
-    context = {'form': form}
+    context = {'form': form, 'project': project}
     return render(request, 'projects/project_form.html', context)
 
 @login_required(login_url="login")
